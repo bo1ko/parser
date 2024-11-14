@@ -2,18 +2,11 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 import openpyxl  # Для роботи з Excel файлами
 import json  # Для роботи з JSON-даними
 import re  # Для роботи з регулярними виразами
-
-# Налаштування Chrome WebDriver
-chrome_options = Options()
-# chrome_options.add_argument("--headless")  # Запуск в режимі headless (без вікна браузера)
-# chrome_options.add_argument("--disable-gpu")  # Вимкнення GPU (для кращої стабільності в headless режимі)
-
-
-driver = webdriver.Chrome(options=chrome_options)
-
+from fake_useragent import UserAgent
 
 # Функція для отримання значень із файлу Excel
 def get_queries_from_excel(file_path):
@@ -32,6 +25,14 @@ def clean_string(s):
 
 
 try:
+    options = Options()
+    options.add_argument(f'user-agent={UserAgent().random}')
+    options.add_argument('--disable-blink-features=AutomationControlled')
+    options.add_argument("--log-level=3")
+    options.add_argument("--headless")
+    options.add_argument("--disable-gpu")
+    
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     driver.get("https://exist.ua/api/v1/fulltext/search-v2/?query=53219&short=true")
 
     data, workbook, sheet = get_queries_from_excel("data.xlsx")  # Шлях до вашого файлу
